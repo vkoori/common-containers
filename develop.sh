@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Declare an array to store the available options
-options=("mariadb" "mongo" "redis" "rabbitmq" "adminer" "phpmyadmin" "mongo-express" "redis-commander")
+options=("mariadb" "mongo" "redis" "rabbitmq" "adminer" "phpmyadmin" "mongo-express" "redis-commander" "minio")
 
 # Declare a variable to store the selected options
 selected_options=()
