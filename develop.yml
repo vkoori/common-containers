@@ -1,0 +1,207 @@
+version: "3.8"
+
+services:
+
+    ########################### MARIADB ###########################
+    mariadb-dev:
+        image: mariadb:10.11.2-jammy
+        container_name: mariadb-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["mariadb"]
+        ports:
+            - "3306:3306"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+            MARIADB_DATABASE: test
+            MARIADB_ROOT_PASSWORD: 1234
+            MARIADB_USER: admin
+            MARIADB_PASSWORD: 1234
+        command:
+            [
+                "mysqld",
+                "--default-authentication-plugin=mysql_native_password",
+                "--character-set-server=utf8mb4",
+                "--collation-server=utf8mb4_unicode_ci"
+            ]
+        volumes:
+            - mariadb-dev-data:/var/lib/mysql/
+        networks:
+            - dev-network
+
+    ########################### MONGO ###########################
+    mongo-dev:
+        image: mongo:5.0.16-focal
+        container_name: mongo-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["mongo"]
+        ports:
+            - "27017:27017"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+            MONGO_INITDB_DATABASE: test
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: 1234
+        volumes:
+            - mongo-dev-data:/data/db
+        networks:
+            - dev-network
+
+    ########################### REDIS ###########################
+    redis-dev:
+        image: redis:alpine3.18
+        hostname: redis_dev
+        container_name: redis-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["redis"]
+        ports:
+            - "6379:6379"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+        command:
+            [
+                "redis-server",
+                "--bind",
+                "0.0.0.0",
+                "--appendonly",
+                "yes"
+            ]
+        volumes:
+            - redis-dev-data:/data
+        networks:
+            - dev-network
+
+    ########################### RABBITMQ ###########################
+    rabbitmq-dev:
+        image: rabbitmq:3.8.25-management-alpine
+        container_name: rabbitmq-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["rabbitmq"]
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+            - RABBITMQ_DEFAULT_VHOST=/
+        volumes:
+            - rabbitmq-dev-data:/var/lib/rabbitmq
+        networks:
+            - dev-network
+
+    ########################### ADMINER ###########################
+    adminer-dev:
+        image: dockette/adminer:full
+        container_name: adminer-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["adminer"]
+        ports:
+            - "8080:80"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+        networks:
+            - dev-network
+
+    ########################### PHPMYADMIN ###########################
+    phpmyadmin-dev:
+        image: phpmyadmin:5.2-apache
+        container_name: phpmyadmin-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["phpmyadmin"]
+        ports:
+            - "8081:80"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+            PMA_HOST: 172.16.80.254
+        networks:
+            - dev-network
+
+    ########################### MONGO-EXPRESS ###########################
+    mongo-express-dev:
+        image: mongo-express:latest
+        container_name: mongo-express-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["mongo-express"]
+        ports:
+            - "8082:8081"
+        logging:
+            options:
+                max-size: "50m"
+        environment:
+            TZ: "Asia/Tehran"
+            ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
+            ME_CONFIG_MONGODB_SERVER: mongo-dev
+            ME_CONFIG_MONGODB_PORT: 27017
+            ME_CONFIG_BASICAUTH_USERNAME: root
+            ME_CONFIG_BASICAUTH_PASSWORD: 1234
+            ME_CONFIG_MONGODB_ENABLE_ADMIN: true
+            ME_CONFIG_MONGODB_AUTH_DATABASE: admin
+            ME_CONFIG_MONGODB_AUTH_USERNAME: root
+            ME_CONFIG_MONGODB_AUTH_PASSWORD: 1234
+            ME_CONFIG_MONGODB_ENABLE_COLLECTION_DROP: true
+            ME_CONFIG_BASICAUTH_SECRET: "2c4e5a88-047e-11ec-9580-0242ac130007"
+            ME_CONFIG_MONGODB_FORCE_SECURE: false
+            ME_CONFIG_SITE_COOKIE_SECRET: "bWFya2V0aW5nLm1vbmV5Lmlv"
+        networks:
+            - dev-network
+
+    ########################### REDIS-COMMANDER ###########################
+    redis-commander-dev:
+        image: rediscommander/redis-commander:latest
+        container_name: redis-commander-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["redis-commander"]
+        ports:
+            - "8083:8081"
+        environment:
+            TZ: "Asia/Tehran"
+            REDIS_HOSTS: local:redis_dev:6379
+        networks:
+            - dev-network
+
+# Networks
+networks:
+    dev-network:
+        driver: bridge
+        external: false
+        ipam:
+            driver: default
+            config:
+                - subnet: "172.16.80.0/24"
+                  gateway: "172.16.80.254"
+
+# Volumes
+volumes:
+    mariadb-dev-data:
+        driver: local
+    mongo-dev-data:
+        driver: local
+    redis-dev-data:
+        driver: local
+    rabbitmq-dev-data:
+        driver: local
