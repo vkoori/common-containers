@@ -209,6 +209,26 @@ services:
         networks:
             - dev-network
 
+    ########################### APACHE ###########################
+    apache-dev:
+        build:
+            dockerfile: ./apache/Dockerfile
+            args:
+                - IMAGE=php:${PHP_VERSION:-8.2}-apache
+        container_name: apache-dev
+        restart: unless-stopped
+        tty: true
+        profiles: ["apache"]
+        ports:
+            - "80:80"
+            - "443:443"
+        environment:
+            TZ: "Asia/Tehran"
+        volumes:
+            - ${APACHE_HOST:-/var/www/html}:/var/www/html
+            - ./apache/sites-enabled:/etc/apache2/sites-enabled
+            - ./apache/extra-php-config.ini:/usr/local/etc/php/conf.d/extra-php-config.ini
+
 # Networks
 networks:
     dev-network:
