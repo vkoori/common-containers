@@ -215,7 +215,7 @@ services:
             dockerfile: ./apache/Dockerfile
             args:
                 - IMAGE=php:${PHP_VERSION:-8.2}-apache
-        container_name: apache-dev
+        container_name: apache-dev_${PHP_VERSION:-8.2}
         restart: unless-stopped
         tty: true
         profiles: ["apache"]
